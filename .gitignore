@@ -4,5 +4,4 @@ Build/*
 !Build/install_osx.sh
 !Build/run.sh
 !Build/Patches
-Submodules/*
 .vscode
