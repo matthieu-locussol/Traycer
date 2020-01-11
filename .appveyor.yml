@@ -94,7 +94,7 @@ after_build:
 test: on
 test_script:
     - cmd: cd C:\projects\Traycer\Build\Tests\Release\
-    - cmd: golTests.exe
+    - cmd: TraycerTests.exe
 
 artifacts:
     - path: Traycer

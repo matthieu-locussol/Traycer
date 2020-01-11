@@ -36,8 +36,8 @@ variables:
         - rm Tests/Makefile
         - rm Tests/cmake_install.cmake
         - mkdir -p Tests/Binaries/
-        - mv Tests/golTests Tests/Binaries/.
-        - zip -r golTests-${CI_JOB_NAME}.zip Tests
+        - mv Tests/TraycerTests Tests/Binaries/.
+        - zip -r TraycerTests-${CI_JOB_NAME}.zip Tests
     artifacts:
         when: on_success
         expire_in: 2h
@@ -48,11 +48,11 @@ variables:
     stage: test
     script:
         - cd Build
-        - unzip golTests*.zip
+        - unzip TraycerTests*.zip
         - cd Tests/
         - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$PWD/Submodules"
-        - chmod +x Binaries/golTests
-        - ./Binaries/golTests
+        - chmod +x Binaries/TraycerTests
+        - ./Binaries/TraycerTests
     artifacts:
         when: on_success
         expire_in: 2h
