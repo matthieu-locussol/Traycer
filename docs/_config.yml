@@ -1,0 +1,11 @@
+theme: jekyll-theme-cayman
+version: 1.0.0
+name: Traycer
+description: Raytracer written in C++
+url: https://matthieu-locussol.github.io/Traycer
+repository: https://github.com/matthieu-locussol/Traycer
+show_downloads: true
+github:
+  osx_url: https://github.com/matthieu-locussol/Traycer/releases/latest/download/Traycer_osx-xcode11.zip
+  linux_url: https://github.com/matthieu-locussol/Traycer/releases/latest/download/Traycer_ubuntu-18.04.zip
+  windows_url: https://github.com/matthieu-locussol/Traycer/releases/latest/download/Traycer-vs2019-x64.zip
