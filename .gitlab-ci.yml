@@ -1,0 +1,479 @@
+### INFORMATIONS ###
+
+# Repository : https://github.com/matthieu-locussol/Traycer
+# Pipelines  : https://gitlab.com/matthieu-locussol/Traycer/pipelines
+
+### STAGES CONFIGURATION ###
+
+stages:
+    - build
+    - test
+    - deploy
+
+### VARIABLES CONFIGURATION ###
+
+variables:
+    GIT_STRATEGY: clone
+    GIT_SUBMODULE_STRATEGY: recursive
+
+### BUILD CONFIGURATION ###
+
+.build_template: &build_configuration
+    stage: build
+    script:
+        - mv Build/install_linux.sh .
+        - ./install_linux.sh
+        - cd Build # Traycer/Build
+        - mkdir -p Application/Binaries/
+        - mv Application/Traycer Application/Binaries/.
+        - mv Application Traycer
+        - zip -r Traycer-${CI_JOB_NAME}.zip Traycer
+        - mv *.zip `basename *.zip | sed 's/-build//g'`
+        - mkdir -p Tests/Submodules/
+        - cp ../Submodules/SFML/Build/lib/* Tests/Submodules/.
+        - cp ../Submodules/TGUI/Build/lib/* Tests/Submodules/.
+        - rm -rf Tests/CMakeFiles/
+        - rm Tests/Makefile
+        - rm Tests/cmake_install.cmake
+        - mkdir -p Tests/Binaries/
+        - mv Tests/golTests Tests/Binaries/.
+        - zip -r golTests-${CI_JOB_NAME}.zip Tests
+    artifacts:
+        when: on_success
+        expire_in: 2h
+        paths:
+            - Build/*.zip
+
+.test_template: &test_configuration
+    stage: test
+    script:
+        - cd Build
+        - unzip golTests*.zip
+        - cd Tests/
+        - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$PWD/Submodules"
+        - chmod +x Binaries/golTests
+        - ./Binaries/golTests
+    artifacts:
+        when: on_success
+        expire_in: 2h
+        paths:
+            - Build/Traycer:*.zip
+
+.deploy_template: &deploy_configuration
+    stage: deploy
+    script:
+        - curl -T Build/Traycer*.zip ftp://${FTP_USERNAME}:${FTP_PASSWORD}@${FTP_HOSTNAME}/Traycer_Releases/latest/linux/
+    artifacts:
+        when: on_success
+        expire_in: 90 day
+        paths:
+            - Build/Traycer:*.zip
+
+### DEBIAN 9 (STRETCH) CONFIGURATION ###
+
+build:debian-9:
+    <<: *build_configuration
+    image: debian:9
+    before_script:
+        - apt-get update -y
+        - apt-get -y install build-essential
+        - apt-get -y install git
+        - apt-get -y install cmake
+        - apt-get -y install doxygen
+        - apt-get -y install zip
+        - apt-get -y install libopenal-dev
+        - apt-get -y install libjpeg-dev
+        - apt-get -y install libudev-dev
+        - apt-get -y install libxrandr-dev
+        - apt-get -y install libfreetype6-dev
+        - apt-get -y install libvorbis-dev
+        - apt-get -y install libflac-dev
+        - apt-get -y install libgl1-mesa-dev
+
+test:debian-9:
+    <<: *test_configuration
+    image: debian:9
+    before_script:
+        - apt-get update -y
+        - apt-get -y install build-essential
+        - apt-get -y install zip
+        - apt-get -y install libopenal-dev
+        - apt-get -y install libjpeg-dev
+        - apt-get -y install libudev-dev
+        - apt-get -y install libxrandr-dev
+        - apt-get -y install libfreetype6-dev
+        - apt-get -y install libvorbis-dev
+        - apt-get -y install libflac-dev
+        - apt-get -y install libgl1-mesa-dev
+    dependencies:
+        - build:debian-9
+
+deploy:debian-9:
+    <<: *deploy_configuration
+    image: debian:9
+    before_script:
+        - apt-get update -y
+        - apt-get -y install curl
+    dependencies:
+        - test:debian-9
+
+### UBUNTU 16.04 (XENIAL) CONFIGURATION
+
+build:ubuntu-16.04:
+    <<: *build_configuration
+    image: ubuntu:xenial
+    before_script:
+        - apt-get update -y
+        - apt-get -y install build-essential
+        - apt-get -y install git
+        - apt-get -y install cmake
+        - apt-get -y install doxygen
+        - apt-get -y install zip
+        - apt-get -y install libopenal-dev
+        - apt-get -y install libjpeg-dev
+        - apt-get -y install libudev-dev
+        - apt-get -y install libxrandr-dev
+        - apt-get -y install libfreetype6-dev
+        - apt-get -y install libvorbis-dev
+        - apt-get -y install libflac-dev
+        - apt-get -y install libgl1-mesa-dev
+
+test:ubuntu-16.04:
+    <<: *test_configuration
+    image: ubuntu:xenial
+    before_script:
+        - apt-get update -y
+        - apt-get -y install build-essential
+        - apt-get -y install zip
+        - apt-get -y install libopenal-dev
+        - apt-get -y install libjpeg-dev
+        - apt-get -y install libudev-dev
+        - apt-get -y install libxrandr-dev
+        - apt-get -y install libfreetype6-dev
+        - apt-get -y install libvorbis-dev
+        - apt-get -y install libflac-dev
+        - apt-get -y install libgl1-mesa-dev
+    dependencies:
+        - build:ubuntu-16.04
+
+deploy:ubuntu-16.04:
+    <<: *deploy_configuration
+    image: ubuntu:xenial
+    before_script:
+        - apt-get update -y
+        - apt-get -y install curl
+    dependencies:
+        - test:ubuntu-16.04
+
+### UBUNTU 18.04 (BIONIC) CONFIGURATION
+
+build:ubuntu-18.04:
+    <<: *build_configuration
+    image: ubuntu:bionic
+    before_script:
+        - apt-get update -y
+        - apt-get -y install build-essential
+        - apt-get -y install git
+        - apt-get -y install cmake
+        - apt-get -y install doxygen
+        - apt-get -y install zip
+        - apt-get -y install libopenal-dev
+        - apt-get -y install libjpeg-dev
+        - apt-get -y install libudev-dev
+        - apt-get -y install libxrandr-dev
+        - apt-get -y install libfreetype6-dev
+        - apt-get -y install libvorbis-dev
+        - apt-get -y install libflac-dev
+        - apt-get -y install libgl1-mesa-dev
+
+test:ubuntu-18.04:
+    <<: *test_configuration
+    image: ubuntu:bionic
+    before_script:
+        - apt-get update -y
+        - apt-get -y install build-essential
+        - apt-get -y install zip
+        - apt-get -y install libopenal-dev
+        - apt-get -y install libjpeg-dev
+        - apt-get -y install libudev-dev
+        - apt-get -y install libxrandr-dev
+        - apt-get -y install libfreetype6-dev
+        - apt-get -y install libvorbis-dev
+        - apt-get -y install libflac-dev
+        - apt-get -y install libgl1-mesa-dev
+    dependencies:
+        - build:ubuntu-18.04
+
+deploy:ubuntu-18.04:
+    <<: *deploy_configuration
+    image: ubuntu:bionic
+    before_script:
+        - apt-get update -y
+        - apt-get -y install curl
+    dependencies:
+        - test:ubuntu-18.04
+
+### FEDORA 24 CONFIGURATION
+
+build:fedora-24:
+    <<: *build_configuration
+    image: fedora:24
+    before_script:
+        - dnf -y install make
+        - dnf -y install automake
+        - dnf -y install gcc
+        - dnf -y install gcc-c++
+        - dnf -y install kernel-devel
+        - dnf -y install git
+        - dnf -y install cmake
+        - dnf -y install doxygen
+        - dnf -y install zip
+        - dnf -y install openal*
+        - dnf -y install libjpeg*
+        - dnf -y install systemd-devel # contains Fedora's libudev-dev
+        - dnf -y install libXrandr-devel
+        - dnf -y install freetype-devel
+        - dnf -y install libvorbis*
+        - dnf -y install flac-devel
+        - dnf -y install mesa-libGL-devel
+
+test:fedora-24:
+    <<: *test_configuration
+    image: fedora:24
+    before_script:
+        - dnf -y install make
+        - dnf -y install automake
+        - dnf -y install gcc
+        - dnf -y install gcc-c++
+        - dnf -y install kernel-devel
+        - dnf -y install zip
+        - dnf -y install openal*
+        - dnf -y install libjpeg*
+        - dnf -y install systemd-devel # contains Fedora's libudev-dev
+        - dnf -y install libXrandr-devel
+        - dnf -y install freetype-devel
+        - dnf -y install libvorbis*
+        - dnf -y install flac-devel
+        - dnf -y install mesa-libGL-devel
+    dependencies:
+        - build:fedora-24
+
+deploy:fedora-24:
+    <<: *deploy_configuration
+    image: fedora:24
+    before_script:
+        - dnf -y install curl
+    dependencies:
+        - test:fedora-24
+
+### FEDORA 25 CONFIGURATION
+
+build:fedora-25:
+    <<: *build_configuration
+    image: fedora:25
+    before_script:
+        - dnf -y install make
+        - dnf -y install automake
+        - dnf -y install gcc
+        - dnf -y install gcc-c++
+        - dnf -y install kernel-devel
+        - dnf -y install git
+        - dnf -y install cmake
+        - dnf -y install doxygen
+        - dnf -y install zip
+        - dnf -y install openal*
+        - dnf -y install libjpeg*
+        - dnf -y install systemd-devel # contains Fedora's libudev-dev
+        - dnf -y install libXrandr-devel
+        - dnf -y install freetype-devel
+        - dnf -y install libvorbis*
+        - dnf -y install flac-devel
+        - dnf -y install mesa-libGL-devel
+
+test:fedora-25:
+    <<: *test_configuration
+    image: fedora:25
+    before_script:
+        - dnf -y install make
+        - dnf -y install automake
+        - dnf -y install gcc
+        - dnf -y install gcc-c++
+        - dnf -y install kernel-devel
+        - dnf -y install zip
+        - dnf -y install openal*
+        - dnf -y install libjpeg*
+        - dnf -y install systemd-devel # contains Fedora's libudev-dev
+        - dnf -y install libXrandr-devel
+        - dnf -y install freetype-devel
+        - dnf -y install libvorbis*
+        - dnf -y install flac-devel
+        - dnf -y install mesa-libGL-devel
+    dependencies:
+        - build:fedora-25
+
+deploy:fedora-25:
+    <<: *deploy_configuration
+    image: fedora:25
+    before_script:
+        - dnf -y install curl
+    dependencies:
+        - test:fedora-25
+
+### FEDORA 26 CONFIGURATION
+
+build:fedora-26:
+    <<: *build_configuration
+    image: fedora:26
+    before_script:
+        - dnf -y install make
+        - dnf -y install automake
+        - dnf -y install gcc
+        - dnf -y install gcc-c++
+        - dnf -y install kernel-devel
+        - dnf -y install git
+        - dnf -y install cmake
+        - dnf -y install doxygen
+        - dnf -y install zip
+        - dnf -y install openal*
+        - dnf -y install libjpeg*
+        - dnf -y install systemd-devel # contains Fedora's libudev-dev
+        - dnf -y install libXrandr-devel
+        - dnf -y install freetype-devel
+        - dnf -y install libvorbis*
+        - dnf -y install flac-devel
+        - dnf -y install mesa-libGL-devel
+
+test:fedora-26:
+    <<: *test_configuration
+    image: fedora:26
+    before_script:
+        - dnf -y install make
+        - dnf -y install automake
+        - dnf -y install gcc
+        - dnf -y install gcc-c++
+        - dnf -y install kernel-devel
+        - dnf -y install zip
+        - dnf -y install openal*
+        - dnf -y install libjpeg*
+        - dnf -y install systemd-devel # contains Fedora's libudev-dev
+        - dnf -y install libXrandr-devel
+        - dnf -y install freetype-devel
+        - dnf -y install libvorbis*
+        - dnf -y install flac-devel
+        - dnf -y install mesa-libGL-devel
+    dependencies:
+        - build:fedora-26
+
+deploy:fedora-26:
+    <<: *deploy_configuration
+    image: fedora:26
+    before_script:
+        - dnf -y install curl
+    dependencies:
+        - test:fedora-26
+
+### FEDORA 27 CONFIGURATION
+
+build:fedora-27:
+    <<: *build_configuration
+    image: fedora:27
+    before_script:
+        - dnf -y install make
+        - dnf -y install automake
+        - dnf -y install gcc
+        - dnf -y install gcc-c++
+        - dnf -y install kernel-devel
+        - dnf -y install git
+        - dnf -y install cmake
+        - dnf -y install doxygen
+        - dnf -y install zip
+        - dnf -y install openal*
+        - dnf -y install libjpeg*
+        - dnf -y install systemd-devel # contains Fedora's libudev-dev
+        - dnf -y install libXrandr-devel
+        - dnf -y install freetype-devel
+        - dnf -y install libvorbis*
+        - dnf -y install flac-devel
+        - dnf -y install mesa-libGL-devel
+
+test:fedora-27:
+    <<: *test_configuration
+    image: fedora:27
+    before_script:
+        - dnf -y install make
+        - dnf -y install automake
+        - dnf -y install gcc
+        - dnf -y install gcc-c++
+        - dnf -y install kernel-devel
+        - dnf -y install zip
+        - dnf -y install openal*
+        - dnf -y install libjpeg*
+        - dnf -y install systemd-devel # contains Fedora's libudev-dev
+        - dnf -y install libXrandr-devel
+        - dnf -y install freetype-devel
+        - dnf -y install libvorbis*
+        - dnf -y install flac-devel
+        - dnf -y install mesa-libGL-devel
+    dependencies:
+        - build:fedora-27
+
+deploy:fedora-27:
+    <<: *deploy_configuration
+    image: fedora:27
+    before_script:
+        - dnf -y install curl
+    dependencies:
+        - test:fedora-27
+
+### FEDORA 28 CONFIGURATION
+
+build:fedora-28:
+    <<: *build_configuration
+    image: fedora:28
+    before_script:
+        - dnf -y install make
+        - dnf -y install automake
+        - dnf -y install gcc
+        - dnf -y install gcc-c++
+        - dnf -y install kernel-devel
+        - dnf -y install git
+        - dnf -y install cmake
+        - dnf -y install doxygen
+        - dnf -y install zip
+        - dnf -y install openal*
+        - dnf -y install libjpeg*
+        - dnf -y install systemd-devel # contains Fedora's libudev-dev
+        - dnf -y install libXrandr-devel
+        - dnf -y install freetype-devel
+        - dnf -y install libvorbis*
+        - dnf -y install flac-devel
+        - dnf -y install mesa-libGL-devel
+
+test:fedora-28:
+    <<: *test_configuration
+    image: fedora:28
+    before_script:
+        - dnf -y install make
+        - dnf -y install automake
+        - dnf -y install gcc
+        - dnf -y install gcc-c++
+        - dnf -y install kernel-devel
+        - dnf -y install zip
+        - dnf -y install openal*
+        - dnf -y install libjpeg*
+        - dnf -y install systemd-devel # contains Fedora's libudev-dev
+        - dnf -y install libXrandr-devel
+        - dnf -y install freetype-devel
+        - dnf -y install libvorbis*
+        - dnf -y install flac-devel
+        - dnf -y install mesa-libGL-devel
+    dependencies:
+        - build:fedora-28
+
+deploy:fedora-28:
+    <<: *deploy_configuration
+    image: fedora:28
+    before_script:
+        - dnf -y install curl
+    dependencies:
+        - test:fedora-28

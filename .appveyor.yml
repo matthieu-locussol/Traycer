@@ -1,0 +1,114 @@
+### INFORMATIONS ###
+
+# Repository : https://github.com/matthieu-locussol/Traycer
+# Builds     : https://ci.appveyor.com/project/Jeckhys/Traycer
+
+platform:
+    - Win32
+    - x64
+
+image:
+    - Visual Studio 2015
+    - Visual Studio 2017
+    - Visual Studio 2019
+
+environment:
+    MSVC_DEFAULT_OPTIONS: ON
+    FTP_HOSTNAME:
+      secure: lvnNWkzq6ap/9+XD34nAXA==
+    FTP_USERNAME:
+      secure: /RDpLEKEfBBCZZOX63LssA==
+    FTP_PASSWORD:
+      secure: j5hnloFsUso4YdC1OoMJDg==
+
+init:
+    - cmd: cmake --version
+    - cmd: msbuild /version
+
+clone_folder: C:\projects\Traycer
+
+install:
+    - cmd: git submodule update --init --recursive
+
+before_build:
+    - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" set CMAKE_IMAGE_NAME=Visual Studio 14 2015
+    - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" set CMAKE_IMAGE_NAME=Visual Studio 15 2017
+    - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" set CMAKE_IMAGE_NAME=Visual Studio 16 2019
+    - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" set VS_DATE=vs2015
+    - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" set VS_DATE=vs2017
+    - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" set VS_DATE=vs2019
+    - cmd: if "%platform%"=="Win32" set CMAKE_GENERATOR_NAME=%CMAKE_IMAGE_NAME%
+    - cmd: if "%platform%"=="x64"   set CMAKE_GENERATOR_NAME=%CMAKE_IMAGE_NAME% Win64
+    - cmd: if "%platform%"=="Win32" set PROGRAM_FILES=Program Files (x86)
+    - cmd: if "%platform%"=="x64" set PROGRAM_FILES=Program Files
+    - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" set PROGRAM_FILES=Program Files (x86)
+    - cmd: if "%platform%"=="x64" if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" set CMAKE_GENERATOR_NAME=%CMAKE_IMAGE_NAME%
+    - cmd: if "%platform%"=="x64" if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" set CMAKE_GENERATOR_OPTIONS_A=x64
+    - cmd: if "%platform%"=="Win32" if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" set CMAKE_GENERATOR_OPTIONS_A=Win32
+    - cmd: echo %image%
+    - cmd: echo %platform%
+    - cmd: echo %CMAKE_IMAGE_NAME%
+    - cmd: echo %CMAKE_GENERATOR_NAME%
+    - cmd: cd C:\projects\Traycer\Submodules # Traycer/Submodules
+    - cmd: cd SFML # Traycer/Submodules/SFML
+    - cmd: git checkout 2.5.x
+    - cmd: md Build
+    - cmd: cd Build # Traycer/Submodules/SFML/Build
+    - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" (cmake -G "%CMAKE_GENERATOR_NAME%" -A %CMAKE_GENERATOR_OPTIONS_A% -DCMAKE_BUILD_TYPE=Release ..) else (cmake -G "%CMAKE_GENERATOR_NAME%" -DCMAKE_BUILD_TYPE=Release ..)
+    - cmd: cmake --build . --config "Release"
+    - cmd: cmake --build . --target INSTALL --config "Release"
+    - cmd: cd ../.. # Traycer/Submodules
+    - cmd: dir .
+    - cmd: cd TGUI # Traycer/Submodules/TGUI
+    - cmd: git checkout 0.8
+    - cmd: md Build
+    - cmd: cd Build # Traycer/Submodules/TGUI/Build
+    - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" (cmake -G "%CMAKE_GENERATOR_NAME%" -A %CMAKE_GENERATOR_OPTIONS_A% -DCMAKE_BUILD_TYPE=Release -DSFML_ROOT="C:/%PROGRAM_FILES%/SFML/" ..) else (cmake -G "%CMAKE_GENERATOR_NAME%" -DCMAKE_BUILD_TYPE=Release -DSFML_ROOT="C:/%PROGRAM_FILES%/SFML/" ..)
+    - cmd: cmake --build . --config "Release"
+    - cmd: cmake --build . --target INSTALL --config "Release"
+    - cmd: cd ../../.. # Traycer
+    - cmd: cd Build # Traycer/Build
+    - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" (cmake -G "%CMAKE_GENERATOR_NAME%" -A %CMAKE_GENERATOR_OPTIONS_A% -DCMAKE_BUILD_TYPE=Release -DSFML_ROOT="C:/%PROGRAM_FILES%/SFML/" -DTGUI_ROOT="C:/%PROGRAM_FILES%/TGUI/" ..) else (cmake -G "%CMAKE_GENERATOR_NAME%" -DCMAKE_BUILD_TYPE=Release -DSFML_ROOT="C:/%PROGRAM_FILES%/SFML/" -DTGUI_ROOT="C:/%PROGRAM_FILES%/TGUI/" ..)
+    - cmd: cmake --build . --config "Release"
+    - cmd: xcopy ..\Submodules\SFML\build\lib\Release\*.dll Application\. /s /e /y
+    - cmd: xcopy ..\Submodules\TGUI\build\lib\Release\*.dll Application\. /s /e /y
+    - cmd: dir Application\
+    - cmd: rd Application\CMakeFiles\ /s /q
+    - cmd: del Application\cmake_install.cmake
+    - cmd: del Application\Traycer.vcxproj
+    - cmd: del Application\Traycer.vcxproj.filters
+    - cmd: xcopy Application\Release\Traycer.exe Application\. /y
+    - cmd: rd Application\Release\ /s /q
+    - cmd: rd Application\Traycer.dir\ /s /q
+    - cmd: ren Application Traycer
+    - cmd: move C:\projects\Traycer\Build\Traycer C:\projects\Traycer\.
+
+build:
+    project: C:\projects\Traycer\Build\ALL_BUILD.vcxproj
+    parallel: true
+    verbosity: normal
+
+after_build:
+    - cmd: dir .
+
+test: on
+test_script:
+    - cmd: cd C:\projects\Traycer\Build\Tests\Release\
+    - cmd: golTests.exe
+
+artifacts:
+    - path: Traycer
+      name: Traycer-%VS_DATE%-%platform%
+      type: zip
+
+deploy:
+    provider: FTP
+    protocol: ftp
+    host:
+        secure: lvnNWkzq6ap/9+XD34nAXA==
+    username:
+        secure: /RDpLEKEfBBCZZOX63LssA==
+    password:
+        secure: j5hnloFsUso4YdC1OoMJDg==
+    folder: /Traycer_Releases/latest/windows/
+    artifact: Traycer-%VS_DATE%-%platform%
