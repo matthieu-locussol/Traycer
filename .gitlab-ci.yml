@@ -59,7 +59,7 @@ variables:
 .deploy_template: &deploy_configuration
     stage: deploy
     script:
-        - curl --ipv4 -T Build/Traycer*.zip ftp://${FTP_USERNAME}:${FTP_PASSWORD}@${FTP_HOSTNAME}/Traycer_Releases/latest/linux/
+        - curl -T Build/Traycer*.zip ftp://${FTP_USERNAME}:${FTP_PASSWORD}@${FTP_HOSTNAME}/Traycer_Releases/latest/linux/
     artifacts:
         when: on_success
         expire_in: 90 day
