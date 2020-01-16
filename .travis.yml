@@ -39,7 +39,7 @@ install:
     - sudo zip -r Traycer:${TRAVIS_OS_NAME}-${TRAVIS_OSX_IMAGE}.zip Traycer
 
 script:
-    - mv ../References Tests/.
+    - sudo mv ../References Tests/. --force
     - cd Tests/
     - ./TraycerTests
     - curl -T Traycer*.zip ftp://${FTP_USERNAME}:${FTP_PASSWORD}@${FTP_HOSTNAME}/Traycer_Releases/latest/osx/
