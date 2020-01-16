@@ -1,295 +1,94 @@
-#include <cstdio>
-#include <cstdlib>
-#include <memory>
-#include <vector>
-#include <utility>
-#include <cstdint>
 #include <iostream>
 #include <fstream>
-#include <cmath>
-#include <limits>
-#include <random>
 
-#include <Core/geometry.hpp>
+#include <Core/Camera.hpp>
+#include <Core/Constants.hpp>
+#include <Core/Parser.hpp>
+#include <Core/Renderer.hpp>
+#include <Core/Scene.hpp>
+#include <Lights/AmbientLight.hpp>
+#include <Lights/AreaLight.hpp>
+#include <Shapes/Sphere.hpp>
 
-const float kInfinity = std::numeric_limits<float>::max();
-std::random_device rd;
-std::mt19937 gen(rd());
-std::uniform_real_distribution<> dis(0, 1);
+void Scene1(int width, int height, float fov, int samples);
 
-inline
-float clamp(const float &lo, const float &hi, const float &v)
-{ return std::max(lo, std::min(hi, v)); }
+int main(int argc, char * argv[]) {
+    if(Parser::hasOption(argv, argv + argc, "--help")) {
+        std::cout << "Usage: " << argv[0];
+        std::cout << " [-s samples=" << DEFAULT_SAMPLES << "]";
+        std::cout << " [-w width=" << DEFAULT_WIDTH << "]";
+        std::cout << " [-h height=" << DEFAULT_HEIGHT << "]";
+        std::cout << " [-f fov=" << DEFAULT_FOV << "]";
+        std::cout << " [--help]" << std::endl;
 
-inline
-float deg2rad(const float &deg)
-{ return deg * M_PI / 180; }
+        return EXIT_SUCCESS;
+    }
 
-inline
-Vec3f mix(const Vec3f &a, const Vec3f& b, const float &mixValue)
-{ return a * (1 - mixValue) + b * mixValue; }
+    char * s = Parser::getOption(argv, argv + argc, "-s");
+    char * w = Parser::getOption(argv, argv + argc, "-w");
+    char * h = Parser::getOption(argv, argv + argc, "-h");
+    char * f = Parser::getOption(argv, argv + argc, "-f");
 
-struct Options
-{
-    uint32_t width;
-    uint32_t height;
-    float fov;
-    Matrix44f cameraToWorld;
+    int samples = (s) ? std::atoi(s) : DEFAULT_SAMPLES;
+    int width = (w) ? std::atoi(w) : DEFAULT_WIDTH;
+    int height = (h) ? std::atoi(h) : DEFAULT_HEIGHT;
+    float fov = (f) ? (float)(std::atoi(f)) : DEFAULT_FOV;
+
+    Scene1(width, height, fov, samples);
+
+    return EXIT_SUCCESS;
+}
+
+auto updateProgress = [](float progress) {
+    int progressValue = (int)(progress * 100);
+
+    std::cout << " |";
+    for(int i = 0 ; i < 100 ; i += 2) {
+        std::cout << (i < progressValue ? "=" : "-");
+    }
+    std::cout << "| " << progressValue << " %\r";
+
+    std::cout.flush();
 };
 
-// [comment]
-// Object base class
-// [/comment]
-class Object
-{
- public:
-    Object() : color(dis(gen), dis(gen), dis(gen)) {}
-    virtual ~Object() {}
-    // Method to compute the intersection of the object with a ray
-    // Returns true if an intersection was found, false otherwise
-    // See method implementation in children class for details
-    virtual bool intersect(const Vec3f &, const Vec3f &, float &) const = 0;
-    // Method to compute the surface data such as normal and texture coordnates at the intersection point.
-    // See method implementation in children class for details
-    virtual void getSurfaceData(const Vec3f &, Vec3f &, Vec2f &) const = 0;
-    Vec3f color;
-};
+void Scene1(int width, int height, float fov, int samples) {
+    std::cout << "Generating scene..." << std::endl;
+    std::clock_t t = std::clock();
 
-// [comment]
-// Compute the roots of a quadratic equation
-// [/comment]
-bool solveQuadratic(const float &a, const float &b, const float &c, float &x0, float &x1)
-{
-    float discr = b * b - 4 * a * c;
-    if (discr < 0) return false;
-    else if (discr == 0) {
-        x0 = x1 = - 0.5 * b / a;
-    }
-    else {
-        float q = (b > 0) ?
-            -0.5 * (b + sqrt(discr)) :
-            -0.5 * (b - sqrt(discr));
-        x0 = q / a;
-        x1 = c / q;
-    }
+    Scene scene = Scene();
 
-    return true;
-}
+    Sphere s0 = Sphere( Vector3(0, -10008, 20), 10000, Color(20, 120, 100), 0.2, 0.5, 0.0, 128.0, 0.0);
+    Sphere s1 = Sphere( Vector3(0, 0, 20), 4, Color(165, 10, 14), 0.3, 0.8, 0.5, 128.0, 0.4);
+    Sphere s2 = Sphere( Vector3(5, -1, 15), 2, Color(235, 179, 41), 0.4, 0.6, 0.4, 128.0, 0.4);
+    Sphere s3 = Sphere( Vector3(5, 0, 25), 3, Color(6, 72, 111), 0.3, 0.8, 0.1, 128.0, 0.4);
+    s3.setGlossiness(0.1);
+    Sphere s4 = Sphere( Vector3(-3.5, -1, 10), 2, Color(8, 88, 56), 0.4, 0.6, 0.5, 64.0, 0.4);
+    Sphere s5 = Sphere( Vector3(-5.5, 0, 15), 3, Color(51, 51, 51), 0.3, 0.8, 0.25, 32.0, 0.0);
 
-// [comment]
-// Sphere class. A sphere type object
-// [/comment]
-class Sphere : public Object
-{
-public:
-    Sphere(const Vec3f &c, const float &r) : radius(r), radius2(r *r ), center(c) {}
-    // [comment]
-    // Ray-sphere intersection test
-    //
-    // \param orig is the ray origin
-    //
-    // \param dir is the ray direction
-    //
-    // \param[out] is the distance from the ray origin to the intersection point
-    //
-    // [/comment]
-    bool intersect(const Vec3f &orig, const Vec3f &dir, float &t) const
-    {
-        float t0, t1; // solutions for t if the ray intersects
-#if 0
-        // geometric solution
-        Vec3f L = center - orig;
-        float tca = L.dotProduct(dir);
-        if (tca < 0) return false;
-        float d2 = L.dotProduct(L) - tca * tca;
-        if (d2 > radius2) return false;
-        float thc = sqrt(radius2 - d2);
-        t0 = tca - thc;
-        t1 = tca + thc;
-#else
-        // analytic solution
-        Vec3f L = orig - center;
-        float a = dir.dotProduct(dir);
-        float b = 2 * dir.dotProduct(L);
-        float c = L.dotProduct(L) - radius2;
-        if (!solveQuadratic(a, b, c, t0, t1)) return false;
-#endif
-        if (t0 > t1) std::swap(t0, t1);
+    scene.addObject( &s0 );
+    scene.addObject( &s1 );
+    scene.addObject( &s2 );
+    scene.addObject( &s3 );
+    scene.addObject( &s4 );
+    scene.addObject( &s5 );
 
-        if (t0 < 0) {
-            t0 = t1; // if t0 is negative, let's use t1 instead
-            if (t0 < 0) return false; // both t0 and t1 are negative
-        }
+    // Add light to scene
+    scene.addAmbientLight ( AmbientLight( Vector3(1.0) ) );
+    AreaLight l0 = AreaLight( Vector3(0, 20, 35), Vector3(1.4) );
+    AreaLight l1 = AreaLight( Vector3(20, 20, 35), Vector3(1.8) );
+    scene.addLight( &l0 );
+    scene.addLight( &l1 );
 
-        t = t0;
+    // Add camera
+    Camera camera = Camera( Vector3(0,0,-20), width, height, fov);
+    camera.setPosition(Vector3(0, 20, -20));
+    camera.setAngleX(30 * M_PI / 180.0);
 
-        return true;
-    }
-    // [comment]
-    // Set surface data such as normal and texture coordinates at a given point on the surface
-    //
-    // \param Phit is the point ont the surface we want to get data on
-    //
-    // \param[out] Nhit is the normal at Phit
-    //
-    // \param[out] tex are the texture coordinates at Phit
-    //
-    // [/comment]
-    void getSurfaceData(const Vec3f &Phit, Vec3f &Nhit, Vec2f &tex) const
-    {
-        Nhit = Phit - center;
-        Nhit.normalize();
-        // In this particular case, the normal is simular to a point on a unit sphere
-        // centred around the origin. We can thus use the normal coordinates to compute
-        // the spherical coordinates of Phit.
-        // atan2 returns a value in the range [-pi, pi] and we need to remap it to range [0, 1]
-        // acosf returns a value in the range [0, pi] and we also need to remap it to the range [0, 1]
-        tex.x = (1 + atan2(Nhit.z, Nhit.x) / M_PI) * 0.5;
-        tex.y = acosf(Nhit.y) / M_PI;
-    }
-    float radius, radius2;
-    Vec3f center;
-};
+    // Create Renderer
+    Renderer r = Renderer(width, height, scene, camera);
+    r.render(samples, updateProgress);
 
-// [comment]
-// Returns true if the ray intersects an object. The variable tNear is set to the closest intersection distance and hitObject
-// is a pointer to the intersected object. The variable tNear is set to infinity and hitObject is set null if no intersection
-// was found.
-// [/comment]
-bool trace(const Vec3f &orig, const Vec3f &dir, const std::vector<std::unique_ptr<Object>> &objects, float &tNear, const Object *&hitObject)
-{
-    tNear = kInfinity;
-    std::vector<std::unique_ptr<Object>>::const_iterator iter = objects.begin();
-    for (; iter != objects.end(); ++iter) {
-        float t = kInfinity;
-        if ((*iter)->intersect(orig, dir, t) && t < tNear) {
-            hitObject = iter->get();
-            tNear = t;
-        }
-    }
-
-    return (hitObject != nullptr);
-}
-
-// [comment]
-// Compute the color at the intersection point if any (returns background color otherwise)
-// [/comment]
-Vec3f castRay(
-    const Vec3f &orig, const Vec3f &dir,
-    const std::vector<std::unique_ptr<Object>> &objects)
-{
-    Vec3f hitColor = 0;
-    const Object *hitObject = nullptr; // this is a pointer to the hit object
-    float t; // this is the intersection distance from the ray origin to the hit point
-    if (trace(orig, dir, objects, t, hitObject)) {
-        Vec3f Phit = orig + dir * t;
-        Vec3f Nhit;
-        Vec2f tex;
-        hitObject->getSurfaceData(Phit, Nhit, tex);
-        // Use the normal and texture coordinates to shade the hit point.
-        // The normal is used to compute a simple facing ratio and the texture coordinate
-        // to compute a basic checker board pattern
-        float scale = 4;
-        float pattern = (fmodf(tex.x * scale, 1) > 0.5) ^ (fmodf(tex.y * scale, 1) > 0.5);
-        hitColor = std::max(0.f, Nhit.dotProduct(-dir)) * mix(hitObject->color, hitObject->color * 0.8, pattern);
-    }
-
-    return hitColor;
-}
-
-// [comment]
-// The main render function. This where we iterate over all pixels in the image, generate
-// primary rays and cast these rays into the scene. The content of the framebuffer is
-// saved to a file.
-// [/comment]
-void render(
-    const Options &options,
-    const std::vector<std::unique_ptr<Object>> &objects)
-{
-    Vec3f *framebuffer = new Vec3f[options.width * options.height];
-    Vec3f *pix = framebuffer;
-    float scale = tan(deg2rad(options.fov * 0.5));
-    float imageAspectRatio = options.width / (float)options.height;
-    // [comment]
-    // Don't forget to transform the ray origin (which is also the camera origin
-    // by transforming the point with coordinates (0,0,0) to world-space using the
-    // camera-to-world matrix.
-    // [/comment]
-    Vec3f orig;
-    options.cameraToWorld.multVecMatrix(Vec3f(0), orig);
-    for (uint32_t j = 0; j < options.height; ++j) {
-        for (uint32_t i = 0; i < options.width; ++i) {
-            // [comment]
-            // Generate primary ray direction. Compute the x and y position
-            // of the ray in screen space. This gives a point on the image plane
-            // at z=1. From there, we simply compute the direction by normalized
-            // the resulting vec3f variable. This is similar to taking the vector
-            // between the point on the image plane and the camera origin, which
-            // in camera space is (0,0,0):
-            //
-            // ray.dir = normalize(Vec3f(x,y,-1) - Vec3f(0));
-            // [/comment]
-#ifdef MAYA_STYLE
-            float x = (2 * (i + 0.5) / (float)options.width - 1) * scale;
-            float y = (1 - 2 * (j + 0.5) / (float)options.height) * scale * 1 / imageAspectRatio;
-#else
-
-            float x = (2 * (i + 0.5) / (float)options.width - 1) * imageAspectRatio * scale;
-            float y = (1 - 2 * (j + 0.5) / (float)options.height) * scale;
-#endif
-            // [comment]
-            // Don't forget to transform the ray direction using the camera-to-world matrix.
-            // [/comment]
-            Vec3f dir;
-            options.cameraToWorld.multDirMatrix(Vec3f(x, y, -1), dir);
-            dir.normalize();
-            *(pix++) = castRay(orig, dir, objects);
-        }
-    }
-
-    // Save result to a PPM image (keep these flags if you compile under Windows)
-    std::ofstream ofs("./out.ppm", std::ios::out | std::ios::binary);
-    ofs << "P6\n" << options.width << " " << options.height << "\n255\n";
-    for (uint32_t i = 0; i < options.height * options.width; ++i) {
-        char r = (char)(255 * clamp(0, 1, framebuffer[i].x));
-        char g = (char)(255 * clamp(0, 1, framebuffer[i].y));
-        char b = (char)(255 * clamp(0, 1, framebuffer[i].z));
-        ofs << r << g << b;
-    }
-
-    ofs.close();
-
-    delete [] framebuffer;
-}
-
-// [comment]
-// In the main function of the program, we create the scene (create objects)
-// as well as set the options for the render (image widht and height etc.).
-// We then call the render function().
-// [/comment]
-int main(int argc, char **argv)
-{
-    // creating the scene (adding objects and lights)
-    std::vector<std::unique_ptr<Object>> objects;
-
-    // generate a scene made of random spheres
-    uint32_t numSpheres = 32;
-    gen.seed(0);
-    for (uint32_t i = 0; i < numSpheres; ++i) {
-        Vec3f randPos((0.5 - dis(gen)) * 10, (0.5 - dis(gen)) * 10, (0.5 + dis(gen) * 10));
-        float randRadius = (0.5 + dis(gen) * 0.5);
-        objects.push_back(std::unique_ptr<Object>(new Sphere(randPos, randRadius)));
-    }
-
-    // setting up options
-    Options options;
-    options.width = 640;
-    options.height = 480;
-    options.fov = 51.52;
-    options.cameraToWorld = Matrix44f(0.945519, 0, -0.325569, 0, -0.179534, 0.834209, -0.521403, 0, 0.271593, 0.551447, 0.78876, 0, 4.208271, 8.374532, 17.932925, 1);
-
-    // finally, render
-    render(options, objects);
-
-    return 0;
+    t = std::clock() - t;
+    std::cout << std::endl << "Scene complete." << std::endl << std::endl;
+    std::cout << "Time ellpased: " << ((float)t) / CLOCKS_PER_SEC << " seconds." << std::endl;
 }
