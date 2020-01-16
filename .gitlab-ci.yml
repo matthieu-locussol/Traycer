@@ -29,9 +29,6 @@ variables:
         - mv Application Traycer
         - zip -r Traycer-${CI_JOB_NAME}.zip Traycer
         - mv *.zip `basename *.zip | sed 's/-build//g'`
-        - mkdir -p Tests/Submodules/
-        - cp ../Submodules/SFML/Build/lib/* Tests/Submodules/.
-        - cp ../Submodules/TGUI/Build/lib/* Tests/Submodules/.
         - rm -rf Tests/CMakeFiles/
         - rm Tests/Makefile
         - rm Tests/cmake_install.cmake
@@ -51,7 +48,6 @@ variables:
         - cd Build
         - unzip TraycerTests*.zip
         - cd Tests/
-        - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$PWD/Submodules"
         - chmod +x Binaries/TraycerTests
         - cd Binaries/
         - ./TraycerTests
