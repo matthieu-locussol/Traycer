@@ -1,5 +1,7 @@
 #include <Utils/Lighting.hpp>
 
+#include <algorithm>
+
 namespace Lighting {
     Color getLighting(const BaseShape& object, const Vector3& point, const Vector3& normal, const Vector3& view, const BaseLight * light) {
         Color rayColor;

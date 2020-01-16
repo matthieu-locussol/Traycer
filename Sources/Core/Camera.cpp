@@ -1,5 +1,7 @@
 #include <Core/Camera.hpp>
 
+#include <Core/Constants.hpp>
+
 Camera::Camera(Vector3 position, int width, int height, float fov) {
     m_position = position;
 

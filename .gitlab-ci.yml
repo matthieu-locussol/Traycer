@@ -49,6 +49,7 @@ variables:
         - unzip TraycerTests*.zip
         - cd Tests/
         - chmod +x Binaries/TraycerTests
+        - mv References Binaries/.
         - cd Binaries/
         - ./TraycerTests
     artifacts:
