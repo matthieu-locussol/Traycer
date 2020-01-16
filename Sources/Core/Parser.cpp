@@ -1,5 +1,7 @@
 #include <Core/Parser.hpp>
 
+#include <algorithm>
+
 namespace Parser {
     char * getOption(char ** begin, char ** end, const std::string& option) {
         char ** itr = std::find(begin, end, option);
