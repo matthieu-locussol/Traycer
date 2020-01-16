@@ -30,7 +30,7 @@ IF( NOT CMAKE_PREFIX_PATH )
     SET( CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR} )
 ENDIF()
 
-# Configure Whimsical sources
+# Configure Traycer sources
 
 INCLUDE_DIRECTORIES( "${CMAKE_CURRENT_SOURCE_DIR}/Includes" )
 
@@ -45,26 +45,6 @@ FILE(
     ${TRAYCER_HEADERS}
     ${TRAYCER_INLINES}
 )
-
-# Configuring SFML
-
-FIND_PACKAGE( SFML 2.5.1 REQUIRED system window graphics network audio )
-
-if(NOT SFML_FOUND)
-    message(FATAL_ERROR "Could not find SFML")
-endif()
-
-INCLUDE_DIRECTORIES( ${SFML_INCLUDE_DIR} )
-
-# Configuring TGUI
-
-FIND_PACKAGE( TGUI 0.8 REQUIRED )
-
-if(NOT TGUI_FOUND)
-    message(FATAL_ERROR "Could not find TGUI")
-endif()
-
-INCLUDE_DIRECTORIES( ${TGUI_INCLUDE_DIR} )
 
 # Configuring Catch2
 

@@ -6,7 +6,7 @@
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = Traycer
 PROJECT_NUMBER         =
-PROJECT_BRIEF          = "Traycer is a little raytracer written in C++ using SFML and TGUI libraries."
+PROJECT_BRIEF          = "Traycer is a little raytracer written in C++."
 PROJECT_LOGO           =
 OUTPUT_DIRECTORY       = @CMAKE_CURRENT_BINARY_DIR@/Documentation
 CREATE_SUBDIRS         = NO
