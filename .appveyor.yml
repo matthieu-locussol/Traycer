@@ -75,6 +75,9 @@ after_build:
 test: on
 test_script:
     - cmd: cd C:\projects\Traycer\Build\Tests\Release\
+    - cmd: dir .
+    - cmd: dir ..
+    - cmd: dir ..\..
     - cmd: TraycerTests.exe
 
 artifacts:
