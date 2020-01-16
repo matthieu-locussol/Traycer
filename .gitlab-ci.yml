@@ -36,6 +36,7 @@ variables:
         - rm Tests/Makefile
         - rm Tests/cmake_install.cmake
         - mkdir -p Tests/Binaries/
+        - mv ../References Tests/Binaries/.
         - mv Tests/TraycerTests Tests/Binaries/.
         - zip -r TraycerTests-${CI_JOB_NAME}.zip Tests
     artifacts:

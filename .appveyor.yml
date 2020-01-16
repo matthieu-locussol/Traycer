@@ -72,6 +72,7 @@ before_build:
     - cmd: cmake --build . --config "Release"
     - cmd: xcopy ..\Submodules\SFML\build\lib\Release\*.dll Application\. /s /e /y
     - cmd: xcopy ..\Submodules\TGUI\build\lib\Release\*.dll Application\. /s /e /y
+    - cmd: move C:\projects\Traycer\References C:\projects\Traycer\Build\Tests\Release\.
     - cmd: dir Application\
     - cmd: rd Application\CMakeFiles\ /s /q
     - cmd: del Application\cmake_install.cmake
