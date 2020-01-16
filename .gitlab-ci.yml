@@ -80,14 +80,6 @@ build:debian-9:
         - apt-get -y install cmake
         - apt-get -y install doxygen
         - apt-get -y install zip
-        - apt-get -y install libopenal-dev
-        - apt-get -y install libjpeg-dev
-        - apt-get -y install libudev-dev
-        - apt-get -y install libxrandr-dev
-        - apt-get -y install libfreetype6-dev
-        - apt-get -y install libvorbis-dev
-        - apt-get -y install libflac-dev
-        - apt-get -y install libgl1-mesa-dev
 
 test:debian-9:
     <<: *test_configuration
@@ -96,14 +88,6 @@ test:debian-9:
         - apt-get update -y
         - apt-get -y install build-essential
         - apt-get -y install zip
-        - apt-get -y install libopenal-dev
-        - apt-get -y install libjpeg-dev
-        - apt-get -y install libudev-dev
-        - apt-get -y install libxrandr-dev
-        - apt-get -y install libfreetype6-dev
-        - apt-get -y install libvorbis-dev
-        - apt-get -y install libflac-dev
-        - apt-get -y install libgl1-mesa-dev
     dependencies:
         - build:debian-9
 
@@ -128,14 +112,6 @@ build:ubuntu-16.04:
         - apt-get -y install cmake
         - apt-get -y install doxygen
         - apt-get -y install zip
-        - apt-get -y install libopenal-dev
-        - apt-get -y install libjpeg-dev
-        - apt-get -y install libudev-dev
-        - apt-get -y install libxrandr-dev
-        - apt-get -y install libfreetype6-dev
-        - apt-get -y install libvorbis-dev
-        - apt-get -y install libflac-dev
-        - apt-get -y install libgl1-mesa-dev
 
 test:ubuntu-16.04:
     <<: *test_configuration
@@ -144,14 +120,6 @@ test:ubuntu-16.04:
         - apt-get update -y
         - apt-get -y install build-essential
         - apt-get -y install zip
-        - apt-get -y install libopenal-dev
-        - apt-get -y install libjpeg-dev
-        - apt-get -y install libudev-dev
-        - apt-get -y install libxrandr-dev
-        - apt-get -y install libfreetype6-dev
-        - apt-get -y install libvorbis-dev
-        - apt-get -y install libflac-dev
-        - apt-get -y install libgl1-mesa-dev
     dependencies:
         - build:ubuntu-16.04
 
@@ -176,14 +144,6 @@ build:ubuntu-18.04:
         - apt-get -y install cmake
         - apt-get -y install doxygen
         - apt-get -y install zip
-        - apt-get -y install libopenal-dev
-        - apt-get -y install libjpeg-dev
-        - apt-get -y install libudev-dev
-        - apt-get -y install libxrandr-dev
-        - apt-get -y install libfreetype6-dev
-        - apt-get -y install libvorbis-dev
-        - apt-get -y install libflac-dev
-        - apt-get -y install libgl1-mesa-dev
 
 test:ubuntu-18.04:
     <<: *test_configuration
@@ -192,14 +152,6 @@ test:ubuntu-18.04:
         - apt-get update -y
         - apt-get -y install build-essential
         - apt-get -y install zip
-        - apt-get -y install libopenal-dev
-        - apt-get -y install libjpeg-dev
-        - apt-get -y install libudev-dev
-        - apt-get -y install libxrandr-dev
-        - apt-get -y install libfreetype6-dev
-        - apt-get -y install libvorbis-dev
-        - apt-get -y install libflac-dev
-        - apt-get -y install libgl1-mesa-dev
     dependencies:
         - build:ubuntu-18.04
 
@@ -227,14 +179,6 @@ build:fedora-24:
         - dnf -y install cmake
         - dnf -y install doxygen
         - dnf -y install zip
-        - dnf -y install openal*
-        - dnf -y install libjpeg*
-        - dnf -y install systemd-devel # contains Fedora's libudev-dev
-        - dnf -y install libXrandr-devel
-        - dnf -y install freetype-devel
-        - dnf -y install libvorbis*
-        - dnf -y install flac-devel
-        - dnf -y install mesa-libGL-devel
 
 test:fedora-24:
     <<: *test_configuration
@@ -246,14 +190,6 @@ test:fedora-24:
         - dnf -y install gcc-c++
         - dnf -y install kernel-devel
         - dnf -y install zip
-        - dnf -y install openal*
-        - dnf -y install libjpeg*
-        - dnf -y install systemd-devel # contains Fedora's libudev-dev
-        - dnf -y install libXrandr-devel
-        - dnf -y install freetype-devel
-        - dnf -y install libvorbis*
-        - dnf -y install flac-devel
-        - dnf -y install mesa-libGL-devel
     dependencies:
         - build:fedora-24
 
@@ -280,14 +216,6 @@ build:fedora-25:
         - dnf -y install cmake
         - dnf -y install doxygen
         - dnf -y install zip
-        - dnf -y install openal*
-        - dnf -y install libjpeg*
-        - dnf -y install systemd-devel # contains Fedora's libudev-dev
-        - dnf -y install libXrandr-devel
-        - dnf -y install freetype-devel
-        - dnf -y install libvorbis*
-        - dnf -y install flac-devel
-        - dnf -y install mesa-libGL-devel
 
 test:fedora-25:
     <<: *test_configuration
@@ -299,14 +227,6 @@ test:fedora-25:
         - dnf -y install gcc-c++
         - dnf -y install kernel-devel
         - dnf -y install zip
-        - dnf -y install openal*
-        - dnf -y install libjpeg*
-        - dnf -y install systemd-devel # contains Fedora's libudev-dev
-        - dnf -y install libXrandr-devel
-        - dnf -y install freetype-devel
-        - dnf -y install libvorbis*
-        - dnf -y install flac-devel
-        - dnf -y install mesa-libGL-devel
     dependencies:
         - build:fedora-25
 
@@ -333,14 +253,6 @@ build:fedora-26:
         - dnf -y install cmake
         - dnf -y install doxygen
         - dnf -y install zip
-        - dnf -y install openal*
-        - dnf -y install libjpeg*
-        - dnf -y install systemd-devel # contains Fedora's libudev-dev
-        - dnf -y install libXrandr-devel
-        - dnf -y install freetype-devel
-        - dnf -y install libvorbis*
-        - dnf -y install flac-devel
-        - dnf -y install mesa-libGL-devel
 
 test:fedora-26:
     <<: *test_configuration
@@ -352,14 +264,6 @@ test:fedora-26:
         - dnf -y install gcc-c++
         - dnf -y install kernel-devel
         - dnf -y install zip
-        - dnf -y install openal*
-        - dnf -y install libjpeg*
-        - dnf -y install systemd-devel # contains Fedora's libudev-dev
-        - dnf -y install libXrandr-devel
-        - dnf -y install freetype-devel
-        - dnf -y install libvorbis*
-        - dnf -y install flac-devel
-        - dnf -y install mesa-libGL-devel
     dependencies:
         - build:fedora-26
 
@@ -386,14 +290,6 @@ build:fedora-27:
         - dnf -y install cmake
         - dnf -y install doxygen
         - dnf -y install zip
-        - dnf -y install openal*
-        - dnf -y install libjpeg*
-        - dnf -y install systemd-devel # contains Fedora's libudev-dev
-        - dnf -y install libXrandr-devel
-        - dnf -y install freetype-devel
-        - dnf -y install libvorbis*
-        - dnf -y install flac-devel
-        - dnf -y install mesa-libGL-devel
 
 test:fedora-27:
     <<: *test_configuration
@@ -405,14 +301,6 @@ test:fedora-27:
         - dnf -y install gcc-c++
         - dnf -y install kernel-devel
         - dnf -y install zip
-        - dnf -y install openal*
-        - dnf -y install libjpeg*
-        - dnf -y install systemd-devel # contains Fedora's libudev-dev
-        - dnf -y install libXrandr-devel
-        - dnf -y install freetype-devel
-        - dnf -y install libvorbis*
-        - dnf -y install flac-devel
-        - dnf -y install mesa-libGL-devel
     dependencies:
         - build:fedora-27
 
@@ -439,14 +327,6 @@ build:fedora-28:
         - dnf -y install cmake
         - dnf -y install doxygen
         - dnf -y install zip
-        - dnf -y install openal*
-        - dnf -y install libjpeg*
-        - dnf -y install systemd-devel # contains Fedora's libudev-dev
-        - dnf -y install libXrandr-devel
-        - dnf -y install freetype-devel
-        - dnf -y install libvorbis*
-        - dnf -y install flac-devel
-        - dnf -y install mesa-libGL-devel
 
 test:fedora-28:
     <<: *test_configuration
@@ -458,14 +338,6 @@ test:fedora-28:
         - dnf -y install gcc-c++
         - dnf -y install kernel-devel
         - dnf -y install zip
-        - dnf -y install openal*
-        - dnf -y install libjpeg*
-        - dnf -y install systemd-devel # contains Fedora's libudev-dev
-        - dnf -y install libXrandr-devel
-        - dnf -y install freetype-devel
-        - dnf -y install libvorbis*
-        - dnf -y install flac-devel
-        - dnf -y install mesa-libGL-devel
     dependencies:
         - build:fedora-28
 
