@@ -66,7 +66,7 @@ before_build:
 
 build:
     project: C:\projects\Traycer\Build\ALL_BUILD.vcxproj
-    parallel: true
+    parallel: false // switch to true
     verbosity: normal
 
 after_build:
@@ -77,6 +77,9 @@ test_script:
     - cmd: cd C:\projects\Traycer\Build\Tests\Release\
     - cmd: dir .\References
     - cmd: TraycerTests.exe
+    - cmd: dir .
+    - cmd: FC scene.ppm References\reference.ppm
+    - cmd: FC /B scene.ppm References\reference.ppm
 
 artifacts:
     - path: Traycer

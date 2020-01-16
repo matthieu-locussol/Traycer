@@ -42,5 +42,4 @@ script:
     - sudo mv ../References Tests/.
     - cd Tests/
     - sudo ./TraycerTests
-    - ls
-    - sudo curl -T Traycer*.zip ftp://${FTP_USERNAME}:${FTP_PASSWORD}@${FTP_HOSTNAME}/Traycer_Releases/latest/osx/
+    - sudo curl -T ../Traycer*.zip ftp://${FTP_USERNAME}:${FTP_PASSWORD}@${FTP_HOSTNAME}/Traycer_Releases/latest/osx/
