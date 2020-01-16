@@ -51,6 +51,8 @@ variables:
         - chmod +x Binaries/TraycerTests
         - cd Binaries/
         - ./TraycerTests
+        - ls
+        - diff scene.ppm References/reference.ppm
     artifacts:
         when: on_success
         expire_in: 2h
