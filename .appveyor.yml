@@ -52,7 +52,6 @@ before_build:
     - cmd: cd C:\projects\Traycer\Build # Traycer/Build
     - cmd: if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" (cmake -G "%CMAKE_GENERATOR_NAME%" -A %CMAKE_GENERATOR_OPTIONS_A% -DCMAKE_BUILD_TYPE=Release ..) else (cmake -G "%CMAKE_GENERATOR_NAME%" -DCMAKE_BUILD_TYPE=Release ..)
     - cmd: cmake --build . --config "Release"
-    - cmd: move C:\projects\Traycer\References C:\projects\Traycer\Build\Tests\Release\.
     - cmd: dir Application\
     - cmd: rd Application\CMakeFiles\ /s /q
     - cmd: del Application\cmake_install.cmake
@@ -66,7 +65,7 @@ before_build:
 
 build:
     project: C:\projects\Traycer\Build\ALL_BUILD.vcxproj
-    parallel: false # switch to true
+    parallel: true
     verbosity: normal
 
 after_build:
@@ -75,11 +74,7 @@ after_build:
 test: on
 test_script:
     - cmd: cd C:\projects\Traycer\Build\Tests\Release\
-    - cmd: dir .\References
     - cmd: TraycerTests.exe
-    - cmd: dir .
-    - cmd: FC scene.ppm References\reference.ppm
-    - cmd: FC /B scene.ppm References\reference.ppm
 
 artifacts:
     - path: Traycer
