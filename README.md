@@ -14,4 +14,4 @@ Mac OS | [![Build Status](https://travis-ci.com/matthieu-locussol/Traycer.svg?br
 
 ## Description
 
-Traycer is a little raytracer written in C++ using SFML and TGUI libraries.
+Traycer is a little Ray-Tracer written in C++.

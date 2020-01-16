@@ -1,7 +1,7 @@
 theme: jekyll-theme-cayman
 version: 1.0.0
 name: Traycer
-description: Raytracer written in C++
+description: Ray-Tracer written in C++
 url: https://matthieu-locussol.github.io/Traycer
 repository: https://github.com/matthieu-locussol/Traycer
 show_downloads: true

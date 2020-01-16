@@ -58,13 +58,17 @@ void Scene1(int width, int height, float fov, int samples) {
 
     Scene scene = Scene();
 
-    Sphere s0 = Sphere( Vector3(0, -10008, 20), 10000, Color(20, 120, 100), 0.2, 0.5, 0.0, 128.0, 0.0);
-    Sphere s1 = Sphere( Vector3(0, 0, 20), 4, Color(165, 10, 14), 0.3, 0.8, 0.5, 128.0, 0.4);
-    Sphere s2 = Sphere( Vector3(5, -1, 15), 2, Color(235, 179, 41), 0.4, 0.6, 0.4, 128.0, 0.4);
-    Sphere s3 = Sphere( Vector3(5, 0, 25), 3, Color(6, 72, 111), 0.3, 0.8, 0.1, 128.0, 0.4);
+    Sphere s0 = Sphere( Vector3(0, -10008, 20), 10000, Color(0x00, 0x6A, 0x80), 0.2, 0.5, 0.0, 128.0, 0.0);
+    Sphere s1 = Sphere( Vector3(0, 0, 20), 4, Color(0x1E, 0x88, 0xE5), 0.3, 0.8, 0.5, 128.0, 0.2, 0.45);
+    s1.setGlossiness(0.05);
+    s1.setGlossyTransparency(0.02);
+    Sphere s2 = Sphere( Vector3(5, -1, 15), 2, Color(0xFD, 0xD8, 0x35), 0.4, 0.6, 0.4, 128.0, 0.4);
+    s2.setGlossiness(0.2);
+    Sphere s3 = Sphere( Vector3(5, 0, 25), 3, Color(0x5D, 0x40, 0x37), 0.3, 0.8, 0.1, 128.0, 0.4);
     s3.setGlossiness(0.1);
-    Sphere s4 = Sphere( Vector3(-3.5, -1, 10), 2, Color(8, 88, 56), 0.4, 0.6, 0.5, 64.0, 0.4);
-    Sphere s5 = Sphere( Vector3(-5.5, 0, 15), 3, Color(51, 51, 51), 0.3, 0.8, 0.25, 32.0, 0.0);
+    Sphere s4 = Sphere( Vector3(-3.5, -1, 10), 2, Color(0xFF, 0xAB, 0x91), 0.4, 0.6, 0.5, 64.0, 0.4);
+    s4.setGlossiness(0.4);
+    Sphere s5 = Sphere( Vector3(-5.5, 0, 15), 3, Color(0x30, 0x30, 0x30), 0.3, 0.8, 0.25, 32.0, 0.0);
 
     scene.addObject( &s0 );
     scene.addObject( &s1 );
@@ -81,8 +85,7 @@ void Scene1(int width, int height, float fov, int samples) {
     scene.addLight( &l1 );
 
     // Add camera
-    Camera camera = Camera( Vector3(0,0,-20), width, height, fov);
-    camera.setPosition(Vector3(0, 20, -20));
+    Camera camera = Camera( Vector3(0, 20, -20), width, height, fov);
     camera.setAngleX(30 * M_PI / 180.0);
 
     // Create Renderer
